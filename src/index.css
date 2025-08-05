@@ -714,7 +714,6 @@ body {
 /* Action Buttons */
 .post-actions {
   display: flex;
-  justify-content: space-between;
   padding: 8px 0;
   border-bottom: 1px solid #eee;
   margin-bottom: 16px;
@@ -1053,4 +1052,61 @@ body {
     flex: 1;
     justify-content: center;
   }
+}
+
+/* Add this to your index.css */
+.post-actions-menu {
+  position: relative;
+  margin-left: auto;
+}
+
+.post-actions-trigger {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--gray);
+  font-size: 1.5rem;
+  padding: 4px;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.post-actions-trigger:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.post-actions-dropdown {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  min-width: 160px;
+  z-index: 10;
+  overflow: hidden;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.post-actions-dropdown button {
+  display: block;
+  width: 100%;
+  padding: 8px 16px;
+  text-align: left;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text);
+}
+
+.post-actions-dropdown button:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.post-actions-dropdown button.delete {
+  color: var(--danger);
 }

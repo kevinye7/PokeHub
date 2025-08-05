@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import Comment from '../components/Comment'
@@ -22,6 +22,8 @@ export default function PostDetail({ onPostUpdated }) {
   const [error, setError] = useState('')
   const [username, setUsername] = useState('Trainer')
   const [hasLiked, setHasLiked] = useState(false)
+  const [showActionsMenu, setShowActionsMenu] = useState(false)
+  const actionsMenuRef = useRef(null)
 
   useEffect(() => {
     fetchPost()
@@ -33,6 +35,17 @@ export default function PostDetail({ onPostUpdated }) {
         checkIfLiked(user.id)
       }
     })
+
+    const handleClickOutside = (event) => {
+      if (actionsMenuRef.current && !actionsMenuRef.current.contains(event.target)) {
+        setShowActionsMenu(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
   }, [id])
 
   const fetchUsername = async (userId) => {
@@ -109,7 +122,6 @@ export default function PostDetail({ onPostUpdated }) {
 
       const newLikes = hasLiked ? post.likes - 1 : post.likes + 1
       
-      // First update the likes count in posts table
       const { data, error } = await supabase
         .from('posts')
         .update({ likes: newLikes })
@@ -118,7 +130,6 @@ export default function PostDetail({ onPostUpdated }) {
 
       if (error) throw error
 
-      // Then update the junction table
       if (hasLiked) {
         await supabase
           .from('post_likes')
@@ -134,14 +145,12 @@ export default function PostDetail({ onPostUpdated }) {
           })
       }
 
-      // Update local state
       setPost(prev => ({
         ...prev,
         likes: newLikes
       }))
       setHasLiked(!hasLiked)
       
-      // Notify parent component of the update
       if (onPostUpdated) onPostUpdated(data[0])
     } catch (error) {
       console.error('Error toggling like:', error)
@@ -275,6 +284,38 @@ export default function PostDetail({ onPostUpdated }) {
                   </span>
                 </div>
               </Link>
+              
+              {user?.id === post.user_id && (
+                <div className="post-actions-menu" ref={actionsMenuRef}>
+                  <button 
+                    className="post-actions-trigger"
+                    onClick={() => setShowActionsMenu(!showActionsMenu)}
+                    aria-label="Post actions"
+                  >
+                    ⋯
+                  </button>
+                  
+                  {showActionsMenu && (
+                    <div className="post-actions-dropdown">
+                      <button onClick={() => {
+                        setIsEditing(true)
+                        setShowActionsMenu(false)
+                      }}>
+                        Edit Post
+                      </button>
+                      <button 
+                        onClick={() => {
+                          handleDeletePost()
+                          setShowActionsMenu(false)
+                        }}
+                        className="delete"
+                      >
+                        Delete Post
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             <div className="post-body">
@@ -341,15 +382,6 @@ export default function PostDetail({ onPostUpdated }) {
               )}
             </div>
           </div>
-        </div>
-      )}
-
-      {user?.id === post.user_id && !isEditing && (
-        <div className="post-management-actions">
-          <button onClick={() => setIsEditing(true)}>Edit Post</button>
-          <button onClick={handleDeletePost} className="delete-btn">
-            Delete Post
-          </button>
         </div>
       )}
     </div>

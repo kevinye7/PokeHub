@@ -10,33 +10,43 @@ export default function Home() {
   const [user, setUser] = useState(null)
 
   useEffect(() => {
+    async function fetchPosts() {
+      let query = supabase
+        .from('posts')
+        .select(`*, comments:comments(count)`)
+        .order(sortBy, { ascending: sortBy === 'created_at' ? false : true })
+
+      if (searchTerm) {
+        query = query.ilike('title', `%${searchTerm}%`)
+      }
+
+      const { data, error } = await query
+
+      if (error) {
+        console.error('Error fetching posts:', error)
+      } else {
+        const postsWithCounts = data.map(post => ({
+          ...post,
+          comment_count: post.comments[0]?.count || 0
+        }))
+        setPosts(postsWithCounts)
+      }
+    }
+
     fetchPosts()
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      setUser(user)
+    checkUser()
+    
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user ?? null)
     })
+
+    return () => subscription?.unsubscribe()
   }, [sortBy])
 
-  async function fetchPosts() {
-    let query = supabase
-      .from('posts')
-      .select(`*, comments:comments(count)`)
-      .order(sortBy, { ascending: sortBy === 'created_at' ? false : true })
-
-    if (searchTerm) {
-      query = query.ilike('title', `%${searchTerm}%`)
-    }
-
-    const { data, error } = await query
-
-    if (error) {
-      console.error('Error fetching posts:', error)
-    } else {
-      const postsWithCounts = data.map(post => ({
-        ...post,
-        comment_count: post.comments[0]?.count || 0
-      }))
-      setPosts(postsWithCounts)
-    }
+  async function checkUser() {
+    const { data: { user } } = await supabase.auth.getUser()
+    setUser(user)
   }
 
   const handlePostCreated = (newPost) => {

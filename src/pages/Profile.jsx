@@ -82,17 +82,23 @@ export default function Profile() {
         // Check if viewing own profile
         setIsCurrentUser(currentUser?.id === userId);
 
-        // Fetch user's posts
+        // Fetch user's posts with comment counts
         const { data: postsData, error: postsError } = await supabase
           .from('posts')
-          .select('*')
+          .select('*, comments:comments(count)')
           .eq('user_id', userId)
           .order('created_at', { ascending: false });
 
         if (postsError) throw postsError;
 
+        // Add comment_count to each post
+        const postsWithCounts = postsData.map(post => ({
+          ...post,
+          comment_count: post.comments[0]?.count || 0
+        }));
+
         setProfile(profileData);
-        setPosts(postsData);
+        setPosts(postsWithCounts);
         setFormData({
           username: profileData.username || '',
           avatarFile: null

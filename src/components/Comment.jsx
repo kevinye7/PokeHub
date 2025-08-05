@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from '../supabaseClient'
 import UserAvatar from './UserAvatar'
 import { Link } from 'react-router-dom'
+import { formatDistanceToNow } from 'date-fns'
 
 export default function Comment({ comment }) {
   const [username, setUsername] = useState('Trainer')
@@ -35,7 +36,7 @@ export default function Comment({ comment }) {
           <span>{username}</span>
         </Link>
         <span className="comment-date">
-          {new Date(comment.created_at).toLocaleString()}
+          {formatDistanceToNow(new Date(comment.created_at + 'Z'), { addSuffix: true })}
         </span>
       </div>
       <div className="comment-content">{comment.content}</div>
