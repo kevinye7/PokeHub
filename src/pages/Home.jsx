@@ -3,36 +3,13 @@ import { supabase } from '../supabaseClient'
 import PostList from '../components/PostList'
 import CreatePost from '../components/CreatePost'
 
-export default function Home() {
+function Home() {
   const [posts, setPosts] = useState([])
   const [searchTerm, setSearchTerm] = useState('')
   const [sortBy, setSortBy] = useState('created_at')
   const [user, setUser] = useState(null)
 
   useEffect(() => {
-    async function fetchPosts() {
-      let query = supabase
-        .from('posts')
-        .select(`*, comments:comments(count)`)
-        .order(sortBy, { ascending: sortBy === 'created_at' ? false : true })
-
-      if (searchTerm) {
-        query = query.ilike('title', `%${searchTerm}%`)
-      }
-
-      const { data, error } = await query
-
-      if (error) {
-        console.error('Error fetching posts:', error)
-      } else {
-        const postsWithCounts = data.map(post => ({
-          ...post,
-          comment_count: post.comments[0]?.count || 0
-        }))
-        setPosts(postsWithCounts)
-      }
-    }
-
     fetchPosts()
     checkUser()
     
@@ -47,6 +24,29 @@ export default function Home() {
   async function checkUser() {
     const { data: { user } } = await supabase.auth.getUser()
     setUser(user)
+  }
+
+  async function fetchPosts() {
+    let query = supabase
+      .from('posts')
+      .select(`*, comments:comments(count)`)
+      .order(sortBy, { ascending: false })
+
+    if (searchTerm) {
+      query = query.ilike('title', `%${searchTerm}%`)
+    }
+
+    const { data, error } = await query
+
+    if (error) {
+      console.error('Error fetching posts:', error)
+    } else {
+      const postsWithCounts = data.map(post => ({
+        ...post,
+        comments: post.comments[0]?.count || 0
+      }))
+      setPosts(postsWithCounts)
+    }
   }
 
   const handlePostCreated = (newPost) => {
@@ -84,3 +84,5 @@ export default function Home() {
     </div>
   )
 }
+
+export default Home

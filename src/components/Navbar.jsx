@@ -70,13 +70,13 @@ export default function Navbar() {
                 >
                   Profile
                 </Link>
-                <Link 
+                {/* <Link 
                   to="/settings" 
                   className="dropdown-item"
                   onClick={() => setShowDropdown(false)}
                 >
                   Settings
-                </Link>
+                </Link> */}
                 <button 
                   className="dropdown-item logout"
                   onClick={handleLogout}

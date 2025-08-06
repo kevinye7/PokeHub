@@ -4,7 +4,7 @@ import UserAvatar from './UserAvatar';
 import { formatDistanceToNow } from 'date-fns';
 import { useState, useEffect } from 'react';
 
-export default function PostList({ posts, onPostUpdated }) {
+function PostList({ posts, onPostUpdated }) {
   const [usernames, setUsernames] = useState({});
   const [likedPosts, setLikedPosts] = useState({});
   const [user, setUser] = useState(null);
@@ -117,7 +117,7 @@ export default function PostList({ posts, onPostUpdated }) {
 
             <div className="engagement-metrics">
               <span className="likes-count">{post.likes || 0} {post.likes === 1 ? 'like' : 'likes'}</span>
-              <span className="comments-count">{post.comment_count || 0} {post.comment_count === 1 ? 'comment' : 'comments'}</span>
+              <span className="comments-count">{post.comments || 0} {post.comments === 1 ? 'comment' : 'comments'}</span>
             </div>
 
             <div className="post-footer">
@@ -142,3 +142,5 @@ export default function PostList({ posts, onPostUpdated }) {
     </div>
   );
 }
+
+export default PostList

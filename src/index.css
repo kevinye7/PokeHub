@@ -873,8 +873,30 @@ body {
 /* Form actions */
 .form-actions {
   display: flex;
-  gap: 12px;
-  margin-top: 20px;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.save-btn {
+  padding: 0.75rem 1.5rem;
+  background: var(--primary-dark);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  flex: 1;
+}
+
+.cancel-btn {
+  padding: 0.75rem 1.5rem;
+  background: #f0f0f0;
+  color: var(--gray);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  flex: 1;
 }
 
 /* Profile Page */
@@ -924,13 +946,56 @@ body {
 }
 
 .profile-edit-form {
-  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+}
+
+.clean-input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+  background: #f9f9f9;
+}
+
+.avatar-upload-label {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  background: var(--primary);
+  color: var(--primary-darker);
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  text-align: center;
+  transition: all 0.2s;
+}
+
+.avatar-upload-label:hover {
+  background: var(--secondary);
+}
+
+.hidden-file-input {
+  display: none;
+}
+
+.file-selected {
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  color: var(--gray);
 }
 
 .user-posts {
   margin-top: 32px;
   padding-top: 24px;
   border-top: 1px solid #eee;
+}
+
+.no-posts-message {
+  display: flex;
+  justify-content: center;
 }
 
 /* User Avatar */
@@ -1028,7 +1093,6 @@ body {
     padding: 16px;
   }
 
-  /* Mobile adjustments for create post */
   .post-options {
     flex-direction: column;
     gap: 8px;
@@ -1054,7 +1118,6 @@ body {
   }
 }
 
-/* Add this to your index.css */
 .post-actions-menu {
   position: relative;
   margin-left: auto;
@@ -1109,4 +1172,27 @@ body {
 
 .post-actions-dropdown button.delete {
   color: var(--danger);
+}
+
+.edit-post-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.edit-post-form h3 {
+  color: var(--primary-darker);
+  margin-bottom: 0.5rem;
+}
+
+.clean-textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+  background: #f9f9f9;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 120px;
 }

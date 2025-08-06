@@ -1,16 +1,14 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
 import PostList from '../components/PostList';
 import UserAvatar from '../components/UserAvatar';
 
 export default function Profile() {
   const { userId } = useParams();
-  const navigate = useNavigate();
   const [profile, setProfile] = useState(null);
   const [posts, setPosts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState('');
   const [isCurrentUser, setIsCurrentUser] = useState(false);
   const [editing, setEditing] = useState(false);
   const [formData, setFormData] = useState({
@@ -18,44 +16,27 @@ export default function Profile() {
     avatarFile: null
   });
 
-  const handlePostUpdated = (updatedPost) => {
-    setPosts(posts.map(post => 
-      post.id === updatedPost.id ? { ...post, likes: updatedPost.likes } : post
-    ));
-  };
-
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
-      setError('');
       
       try {
         // Get current user
         const { data: { user: currentUser }, error: authError } = await supabase.auth.getUser();
         if (authError) throw authError;
         
-        // Try fetching profile with retry logic
         let profileData = null;
-        let attempts = 0;
-        const maxAttempts = 3;
+
+        const { data, error: profileError } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', userId)
+          .maybeSingle();
+
+        if (profileError) throw profileError;
+
+        profileData = data;
         
-        while (attempts < maxAttempts && !profileData) {
-          const { data, error: profileError } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', userId)
-            .maybeSingle();
-
-          if (profileError) throw profileError;
-          
-          if (data) {
-            profileData = data;
-          } else {
-            attempts++;
-            await new Promise(resolve => setTimeout(resolve, 1000));
-          }
-        }
-
         if (!profileData) {
           // If still no profile, create a basic one
           const { error: createError } = await supabase
@@ -94,7 +75,7 @@ export default function Profile() {
         // Add comment_count to each post
         const postsWithCounts = postsData.map(post => ({
           ...post,
-          comment_count: post.comments[0]?.count || 0
+          comments: post.comments[0]?.count || 0
         }));
 
         setProfile(profileData);
@@ -104,7 +85,6 @@ export default function Profile() {
           avatarFile: null
         });
       } catch (error) {
-        setError(error.message);
         console.error('Profile load error:', error);
       } finally {
         setIsLoading(false);
@@ -157,8 +137,14 @@ export default function Profile() {
       setProfile(data);
       setEditing(false);
     } catch (error) {
-      setError(error.message);
+      console.error('Profile update error:', error);
     }
+  };
+
+  const handlePostUpdated = (updatedPost) => {
+    setPosts(posts.map(post => 
+      post.id === updatedPost.id ? { ...post, likes: updatedPost.likes } : post
+    ));
   };
 
   if (isLoading) {
@@ -170,21 +156,8 @@ export default function Profile() {
     );
   }
 
-  if (error) {
-    return (
-      <div className="error">
-        <p>{error}</p>
-        <button onClick={() => window.location.reload()} className="refresh-btn">
-          Refresh Page
-        </button>
-      </div>
-    );
-  }
-
   return (
     <div className="profile-page">
-      {error && <div className="error-message">{error}</div>}
-      
       <div className="profile-header">
         <div className="avatar-container">
           <UserAvatar userId={userId} size={120} />
@@ -193,26 +166,35 @@ export default function Profile() {
         {editing ? (
           <form onSubmit={handleUpdateProfile} className="profile-edit-form">
             <div className="form-group">
-              <label>Trainer Name</label>
               <input
                 type="text"
                 value={formData.username}
                 onChange={(e) => setFormData({...formData, username: e.target.value})}
+                placeholder="Trainer name"
                 required
+                className="clean-input"
               />
             </div>
             <div className="form-group">
-              <label>Avatar</label>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => setFormData({...formData, avatarFile: e.target.files[0]})}
-              />
+              <label className="avatar-upload-label">
+                <span>Change Avatar</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setFormData({...formData, avatarFile: e.target.files[0]})}
+                  className="hidden-file-input"
+                />
+              </label>
+              {formData.avatarFile && (
+                <p className="file-selected">{formData.avatarFile.name}</p>
+              )}
             </div>
             <div className="form-actions">
-              <button type="submit">Save</button>
-              <button type="button" onClick={() => setEditing(false)}>
+              <button type="button" onClick={() => setEditing(false)} className="cancel-btn">
                 Cancel
+              </button>
+              <button type="submit" className="save-btn">
+                Save Changes
               </button>
             </div>
           </form>
@@ -233,7 +215,7 @@ export default function Profile() {
         {posts.length > 0 ? (
           <PostList posts={posts} onPostUpdated={handlePostUpdated} />
         ) : (
-          <p>No posts yet.</p>
+          <p className="no-posts-message">No posts yet.</p>
         )}
       </div>
     </div>

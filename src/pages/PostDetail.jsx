@@ -239,39 +239,49 @@ export default function PostDetail({ onPostUpdated }) {
       
       {isEditing ? (
         <form onSubmit={handleUpdatePost} className="edit-post-form">
+          <h3>Edit Your Post</h3>
+          
           <div className="form-group">
-            <label>Title*</label>
             <input
               type="text"
               value={editData.title}
               onChange={(e) => setEditData({...editData, title: e.target.value})}
+              placeholder="Post Title"
               required
+              className="clean-input"
             />
           </div>
+          
           <div className="form-group">
-            <label>Content</label>
             <textarea
               value={editData.content}
               onChange={(e) => setEditData({...editData, content: e.target.value})}
+              placeholder="What's on your mind?"
               rows="5"
+              className="clean-textarea"
             />
           </div>
+          
           <div className="form-group">
-            <label>Image URL</label>
             <input
               type="url"
               value={editData.image_url}
               onChange={(e) => setEditData({...editData, image_url: e.target.value})}
+              placeholder="Image URL (optional)"
+              className="clean-input"
             />
           </div>
+          
           <div className="form-actions">
-            <button type="submit">Save Changes</button>
-            <button type="button" onClick={() => setIsEditing(false)}>
+            <button type="button" onClick={() => setIsEditing(false)} className="cancel-btn">
               Cancel
+            </button>
+            <button type="submit" className="save-btn">
+              Save Changes
             </button>
           </div>
         </form>
-      ) : (
+    ) : (
         <div className="post-with-comments">
           <div className="post-content">
             <div className="post-header">
